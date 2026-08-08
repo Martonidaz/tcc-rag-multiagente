@@ -1,33 +1,85 @@
-# Esqueleto estrutural dos Agentes (A ser preenchido com a lógica do LangGraph)
+from typing import TypedDict, Annotated
+from langgraph.graph import StateGraph, END
+import operator
+import math
 
-def agent_ragas_faithfulness(state: dict):
-    """
-    Nó A do Grafo: Avalia se a resposta da LLM é fiel ao contexto recuperado.
-    """
-    print("Executando avaliação de Fidelidade (RAGAS)...")
-    # Lógica de chamada ao Ollama para calcular nota de 0 a 1
-    return {"faithfulness_score": 0.85}
+# 1. Definição do Estado (A Memória Compartilhada do Grafo)
+# O StateDict garante a tipagem rigorosa exigida na engenharia de software
+class AgentState(TypedDict):
+    user_prompt: str
+    llm_response: str
+    model_name: str
+    faithfulness_score: float
+    relevance_score: float
+    entropy_score: float
+    final_status: str
 
-def agent_ragas_relevance(state: dict):
-    """
-    Nó B do Grafo: Avalia se a resposta atende diretamente à pergunta do usuário.
-    """
-    print("Executando avaliação de Relevância (RAGAS)...")
-    # Lógica de cálculo vetorial (Embeddings via ChromaDB)
-    return {"relevance_score": 0.90}
+# 2. Nós de Execução (Papéis dos Agentes)
 
-def agent_semantic_entropy(state: dict):
+def dispatcher_node(state: AgentState):
     """
-    Nó C do Grafo: Induz variância no modelo local e calcula a entropia para detectar alucinação.
+    Nó de Entrada: O Agente Coordenador que recebe a carga do Client-Side
+    e prepara a bifurcação paralela.
     """
-    print("Calculando Entropia Semântica...")
-    # Lógica baseada na Fórmula de Farquhar (Agrupamento de significados)
-    return {"entropy_score": 0.2}
+    print(f"[Coordenador] Interceptação recebida. Modelo Base: {state.get('model_name')}")
+    return {} # Não altera o estado, apenas roteia
 
-def aggregator_node(state: dict):
+def agent_ragas_metrics(state: AgentState):
     """
-    Nó Final: Consolida as métricas, salva no Banco de Dados (Perfil do Usuário) 
-    e prepara o resultado para o frontend.
+    Agente Avaliador RAGAS: Focado na Fidelidade e Relevância.
+    Neste nó, o motor Ollama será chamado para checar a validade do contexto.
     """
-    print("Consolidando métricas e finalizando o grafo.")
-    return {"final_status": "completed"}
+    print("[Avaliador RAGAS] Calculando Fidelity e Answer Relevancy...")
+    # TODO: Integrar a chamada da biblioteca 'ragas' com o modelo local GGUF
+    return {"faithfulness_score": 0.88, "relevance_score": 0.95}
+
+def agent_semantic_entropy(state: AgentState):
+    """
+    Agente de Monitoramento de Entropia: O núcleo matemático do TCC.
+    Quantifica a incerteza probabilística nas respostas.
+    """
+    print("[Avaliador Entropia] Injetando variância e calculando dispersão semântica...")
+    
+    # A implementação completa exigirá gerar amostras com alta temperatura no Ollama
+    # e calcular a similaridade de cosseno. Por hora, estabelecemos o fluxo algébrico:
+    # SE(x) = - \sum P(c|x) * log(P(c|x))
+    
+    mock_entropy = 0.12 # Valor baixo = Alta confiabilidade / Baixa incerteza
+    return {"entropy_score": mock_entropy}
+
+def aggregator_node(state: AgentState):
+    """
+    Nó de Convergência: Analisa as métricas de qualidade e emite o parecer final.
+    """
+    print("[Agregador] Consolidando governança do artefato...")
+    
+    # Lógica de bloqueio algorítmico baseada em limiares (Thresholds)
+    if state.get("entropy_score", 1.0) > 0.5 or state.get("faithfulness_score", 0.0) < 0.7:
+        status = "ALUCINACAO_DETECTADA"
+    else:
+        status = "INFORMACAO_CONFIAVEL"
+        
+    return {"final_status": status}
+
+# 3. Compilação do Grafo (DAG) - Otimizado para Edge Computing (2GB VRAM)
+workflow = StateGraph(AgentState)
+
+# Adicionando os nós ao grafo
+workflow.add_node("dispatcher", dispatcher_node)
+workflow.add_node("ragas_evaluator", agent_ragas_metrics)
+workflow.add_node("entropy_evaluator", agent_semantic_entropy)
+workflow.add_node("aggregator", aggregator_node)
+
+# Desenhando as arestas (Fluxo de Controle Sequencial)
+workflow.set_entry_point("dispatcher")
+
+# Execução Sequencial: Mitiga o gargalo de VRAM impedindo acessos simultâneos ao Ollama
+workflow.add_edge("dispatcher", "ragas_evaluator")
+workflow.add_edge("ragas_evaluator", "entropy_evaluator")
+workflow.add_edge("entropy_evaluator", "aggregator")
+
+# Fim do ciclo
+workflow.add_edge("aggregator", END)
+
+# O aplicativo compilado que será exportado para a API
+evaluation_graph = workflow.compile()
