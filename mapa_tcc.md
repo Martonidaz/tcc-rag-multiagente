@@ -3,7 +3,7 @@
 Este arquivo é **gerado automaticamente** pelo script `infra/scripts/auto_mapa.py`.
 Não edite a árvore manualmente.
 
-## 🌳 Árvore de Diretórios (Formato Markmap)
+## 🌳 Árvore de Diretórios (Formato Markmap / Universal)
 
 * **`tcc-rag-multiagente/`** (Raiz do Monorepo)
   * `README.md`
@@ -38,3 +38,20 @@ Não edite a árvore manualmente.
       * `agents.py`
       * `main.py`
     * `tests/`
+
+---
+
+## 📊 Grafo Arquitetural (Formato Mermaid)
+*No GitHub, o bloco abaixo é renderizado automaticamente como um diagrama visual, focado na arquitetura de alto nível.*
+
+```mermaid
+graph TD
+    tccragmultiagente[tcc-rag-multiagente]
+    tccragmultiagente --> github0[.github]
+    tccragmultiagente --> clientextension0[client-extension]
+    tccragmultiagente --> docs0[docs]
+    tccragmultiagente --> infra0[infra]
+    tccragmultiagente --> serverapi0[server-api]
+    tccragmultiagente --> READMEmdf0(README.md)
+    tccragmultiagente --> mapatccmdf0(mapa_tcc.md)
+```
