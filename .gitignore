@@ -1,0 +1,17 @@
+# Ambientes Virtuais Python
+venv/
+env/
+__pycache__/
+*.pyc
+
+# Dependências do Node (Frontend)
+node_modules/
+
+# Bancos de Dados Locais e Logs
+*.sqlite3
+*.db
+*.log
+
+# Arquivos de Sistema Operacional
+.DS_Store
+Thumbs.db
