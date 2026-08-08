@@ -16,6 +16,8 @@ function extractInteractionData() {
 // Função mock para enviar o payload para nossa API local no WSL
 async function sendToLocalBackend(payload) {
     try {
+        const response = await fetch("http://127.0.0.1:8000/api/evaluate", {
+            method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
