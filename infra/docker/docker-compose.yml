@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # Motor de Inferência Local (Ollama)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: tcc_ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+    environment:
+      - OLLAMA_KEEP_ALIVE=5m # Descarrega o modelo da VRAM após 5 minutos de inatividade para economizar memória
+
+  # Backend (API FastAPI + LangGraph)
+  api:
+    build:
+      context: ../../server-api
+      dockerfile: Dockerfile
+    container_name: tcc_backend_api
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ../../server-api:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
